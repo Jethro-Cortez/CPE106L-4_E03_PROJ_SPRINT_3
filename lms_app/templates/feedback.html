@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Feedback for {{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="feedback-container">
+        <!-- 📖 Book Title -->
+        <h2 class="feedback-title">
+            <i class="fas fa-comment-alt"></i> Feedback for <span>{{ book.title }}</span>
+        </h2>
+
+        <!-- 📝 Feedback Form -->
+        {% if current_user.is_authenticated %}
+        <form method="POST" class="feedback-form" id="feedback-form">
+            <div class="form-group">
+                <label for="review_text">
+                    <i class="fas fa-pen"></i> Your Review
+                </label>
+                <textarea name="review_text" 
+                          id="review_text" 
+                          class="form-control" 
+                          rows="4" 
+                          placeholder="Share your thoughts..." 
+                          required></textarea>
+            </div>
+
+            <div class="form-group rating-group">
+                <label><i class="fas fa-star"></i> Rating:</label>
+                <div class="star-rating">
+                    {% for i in range(5,0,-1) %}
+                    <input type="radio" id="star{{i}}" name="rating" value="{{i}}" required>
+                    <label for="star{{i}}" class="fas fa-star"></label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Submit Feedback
+            </button>
+        </form>
+        {% else %}
+        <div class="login-hint">
+            <i class="fas fa-lock"></i>
+            Please <a href="{{ url_for('main.login') }}">login</a> to leave feedback.
+        </div>
+        {% endif %}
+
+        <!-- 💬 Existing Reviews -->
+        <section class="reviews-section">
+            <h3><i class="fas fa-comments"></i> Community Reviews</h3>
+            <div class="reviews-container">
+                {% for feedback in feedbacks %}
+                <div class="review-item">
+                    <div class="review-header">
+                        <span class="user-badge"><i class="fas fa-user-circle"></i> {{ feedback.user.username }}</span>
+                        <div class="review-meta">
+                            <span class="review-date">{{ feedback.timestamp|time_ago }}</span>
+                            <div class="review-rating">
+                                {% for _ in range(feedback.rating) %}
+                                <i class="fas fa-star"></i>
+                                {% endfor %}
+                                {% for _ in range(5 - feedback.rating) %}
+                                <i class="far fa-star"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="review-text">{{ feedback.message }}</p>
+                </div>
+                {% else %}
+                <div class="no-reviews">
+                    <i class="fas fa-book-open fa-3x" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <p>No reviews yet. Be the first to share your thoughts!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
