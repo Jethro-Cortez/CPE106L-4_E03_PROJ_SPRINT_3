@@ -47,7 +47,7 @@ To get started with BookIT, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/BookIT.git
+   git clone https://github.com/Jethro-Cortez/CPE106L-4_E03_PROJ_SPRINT_3/edit/CAPULI-backup/BookIT%20v1.8.git
    cd BookIT
    ```
 
