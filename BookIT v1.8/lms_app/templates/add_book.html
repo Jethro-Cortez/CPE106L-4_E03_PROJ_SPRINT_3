@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Add Book{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="enhanced-form">
+        <h1 class="form-title"><i class="fas fa-book-medical"></i> Add a New Book</h1>
+        <p class="form-subtitle">Fill in the details and upload a cover to enrich your library.</p>
+
+        <!-- 🛡️ Flash Messages for Feedback -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- 📋 Enhanced Book Form -->
+        <form method="POST" enctype="multipart/form-data" id="addBookForm" novalidate>
+            <!-- 📚 Book Title -->
+            <div class="form-group floating-label">
+                <input type="text" id="title" name="title" class="form-control" placeholder=" " required aria-required="true">
+                <label for="title"><i class="fas fa-book"></i> Title <span class="required">*</span></label>
+                <small class="form-error" id="titleError">Title is required.</small>
+            </div>
+
+            <!-- 👤 Author -->
+            <div class="form-group floating-label">
+                <input type="text" id="author" name="author" class="form-control" placeholder=" " required aria-required="true">
+                <label for="author"><i class="fas fa-user-edit"></i> Author <span class="required">*</span></label>
+                <small class="form-error" id="authorError">Author is required.</small>
+            </div>
+
+            <!-- 🏷️ Genre -->
+            <div class="form-group floating-label">
+                <input type="text" id="genre" name="genre" class="form-control" placeholder=" ">
+                <label for="genre"><i class="fas fa-tag"></i> Genre</label>
+            </div>
+
+            <!-- 📝 Description -->
+            <div class="form-group floating-label">
+                <textarea id="description" name="description" class="form-control" rows="4" placeholder=" "></textarea>
+                <label for="description"><i class="fas fa-align-left"></i> Description</label>
+            </div>
+
+            <!-- 📅 Publish Date -->
+            <div class="form-group floating-label">
+                <input type="date" id="publish_date" name="publish_date" class="form-control" placeholder=" ">
+                <label for="publish_date"><i class="fas fa-calendar-alt"></i> Publish Date</label>
+            </div>
+
+            <!-- 🔢 Quantity with Real-Time Feedback -->
+            <div class="form-group floating-label">
+                <input type="number" id="quantity" name="quantity" class="form-control" min="1" placeholder=" " required aria-required="true">
+                <label for="quantity"><i class="fas fa-sort-numeric-up"></i> Quantity <span class="required">*</span></label>
+                <small class="form-error" id="quantityError">Quantity must be at least 1.</small>
+                <p id="quantity-feedback" class="quantity-feedback"></p>
+            </div>
+
+            <!-- 🖼️ Drag-and-Drop Cover Upload -->
+            <div class="form-group">
+                <label><i class="fas fa-image"></i> Upload Cover Image</label>
+                <div id="drop-zone">
+                    <i class="fas fa-cloud-upload-alt fa-3x" style="color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <p>Drag & drop the cover image here or click to upload</p>
+                    <input type="file" id="cover" name="cover" accept="image/*" hidden>
+                    <img id="cover-preview" src="#" alt="Cover Preview" style="display:none;">
+                </div>
+            </div>
+
+            <!-- 🚀 Submit Button -->
+            <button type="submit" class="btn-gradient">
+                <i class="fas fa-plus-circle"></i> Add Book
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("addBookForm");
+        const titleInput = document.getElementById("title");
+        const authorInput = document.getElementById("author");
+        const quantityInput = document.getElementById("quantity");
+        const titleError = document.getElementById("titleError");
+        const authorError = document.getElementById("authorError");
+        const quantityError = document.getElementById("quantityError");
+        const quantityFeedback = document.getElementById("quantity-feedback");
+        const dropZone = document.getElementById("drop-zone");
+        const coverInput = document.getElementById("cover");
+        const coverPreview = document.getElementById("cover-preview");
+
+        // ✅ Client-Side Validation
+        form.addEventListener("submit", function (e) {
+            let valid = true;
+
+            if (!titleInput.value.trim()) {
+                titleError.style.display = "block";
+                titleInput.classList.add("error");
+                valid = false;
+            } else {
+                titleError.style.display = "none";
+                titleInput.classList.remove("error");
+            }
+
+            if (!authorInput.value.trim()) {
+                authorError.style.display = "block";
+                authorInput.classList.add("error");
+                valid = false;
+            } else {
+                authorError.style.display = "none";
+                authorInput.classList.remove("error");
+            }
+
+            if (!quantityInput.value || quantityInput.value < 1) {
+                quantityError.style.display = "block";
+                quantityInput.classList.add("error");
+                valid = false;
+            } else {
+                quantityError.style.display = "none";
+                quantityInput.classList.remove("error");
+            }
+
+            if (!valid) e.preventDefault();
+        });
+
+        // 📊 Real-Time Quantity Feedback
+        quantityInput.addEventListener("input", () => {
+            const quantity = quantityInput.value;
+            if (quantity >= 1) {
+                quantityFeedback.textContent = `📚 ${quantity} ${quantity > 1 ? 'copies' : 'copy'} will be added.`;
+                quantityFeedback.style.color = "var(--primary-color)";
+            } else {
+                quantityFeedback.textContent = "";
+            }
+        });
+
+        // 🖼️ Drag-and-Drop Cover Upload
+        dropZone.addEventListener("click", () => coverInput.click());
+
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith("image/")) {
+                coverInput.files = e.dataTransfer.files;
+                showPreview(file);
+            }
+        });
+
+        coverInput.addEventListener("change", () => {
+            if (coverInput.files[0]) {
+                showPreview(coverInput.files[0]);
+            }
+        });
+
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                coverPreview.src = e.target.result;
+                coverPreview.style.display = "block";
+                
+                // Change the drop zone appearance
+                const uploadIcon = dropZone.querySelector('.fa-cloud-upload-alt');
+                const uploadText = dropZone.querySelector('p');
+                
+                if (uploadIcon) uploadIcon.style.display = 'none';
+                if (uploadText) uploadText.textContent = 'Click to change image';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}
+
