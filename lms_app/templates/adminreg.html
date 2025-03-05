@@ -11,7 +11,9 @@
         </div>
 
         <form method="POST" class="auth-form" id="admin-register-form">
-            <!-- 🔐 Secret Key Field -->
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
             <div class="form-group">
                 <label for="secret_key">
                     <i class="fas fa-key"></i> Secret Key

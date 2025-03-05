@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="book-detail">
+    <div class="book-detail animate-fade-in">
         <!-- 📖 Book Overview -->
         <div class="book-header">
             <div class="book-cover-lg">
@@ -15,26 +15,25 @@
                 <h1>{{ book.title }}</h1>
                 <div class="book-author">By {{ book.author }}</div>
 
-            <!-- 📊 Availability Status -->
-            <div class="book-status">
-                <span class="status-indicator {{ 'available' if book.availability else 'unavailable' }}">
-                    <i class="fas fa-{{ 'check-circle' if book.availability else 'times-circle' }}"></i>
-                    {{ book.availability}}
-                </span>
-                {% if not book.availability and book.transactions %}
-                <p class="due-date">
-                    <i class="fas fa-clock"></i>
-                    Expected return: {{ book.transactions[-1].due_date.strftime('%Y-%m-%d') }}
-                </p>
-                {% endif %}
-            </div>
+                <!-- 📊 Availability Status -->
+                <div class="book-status">
+                    <span class="status-indicator {{ 'available' if not active_transaction else 'unavailable' }}">
+                        <i class="fas fa-{{ 'check-circle' if not active_transaction else 'times-circle' }}"></i>
+                        {{ 'Available' if not active_transaction else 'Unavailable' }}
+                    </span>
+                    {% if active_transaction %}
+                    <p class="due-date">
+                        <i class="fas fa-clock"></i>
+                        Expected return: {{ active_transaction.due_date.strftime('%Y-%m-%d') }}
+                    </p>
+                    {% endif %}
+                </div>
 
                 <!-- 📅 Borrow/Join Waitlist -->
                 {% if current_user.is_authenticated and current_user.role == 'user' %}
                 <form method="POST" action="{{ url_for('main.borrow_book', book_id=book.id) }}" class="borrow-form">
-                    <button type="submit" 
-                            class="btn btn-primary btn-block" 
-                            {{ 'disabled' if not book.availability }}>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-primary btn-block" {{ 'disabled' if not book.availability }}>
                         <i class="fas fa-{{ 'book' if book.availability else 'list' }}"></i>
                         {{ 'Borrow Now' if book.availability else 'Join Waitlist' }}
                     </button>
@@ -42,7 +41,7 @@
                 {% else %}
                     <div class="login-hint">
                         <i class="fas fa-lock"></i>
-                        <a href="{{ url_for('main.login') }}">Log in</a> to borrow or review books.
+                        <a href="{{ url_for('main.login') }}" class="animated-link">Log in</a> to borrow or review books.
                     </div>
                 {% endif %}
             </div>
@@ -78,7 +77,7 @@
 
             <div class="reviews-container">
                 {% for feedback in feedbacks %}
-                <div class="review-item">
+                <div class="review-item animate-fade-in" style="animation-delay: {{ loop.index0 * 0.1 }}s">
                     <div class="review-header">
                         <div class="user-badge">
                             <i class="fas fa-user-circle"></i>
@@ -109,6 +108,8 @@
             <!-- 📝 Submit Review -->
             {% if current_user.is_authenticated and current_user.role == 'user' %}
             <form method="POST" action="{{ url_for('main.add_feedback', book_id=book.id) }}" class="review-form">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <h3><i class="fas fa-pen"></i> Write Your Review</h3>
                 <div class="form-group">
                     <textarea id="review-text" 
@@ -136,11 +137,10 @@
             {% else %}
                 <div class="login-hint">
                     <i class="fas fa-pen"></i>
-                    <a href="{{ url_for('main.login') }}">Log in</a> to submit a review.
+                    <a href="{{ url_for('main.login') }}" class="animated-link">Log in</a> to submit a review.
                 </div>
             {% endif %}
         </section>
     </div>
 </div>
 {% endblock %}
-

@@ -116,3 +116,55 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 })
 
+document.addEventListener('DOMContentLoaded', function() {
+  const stars = document.querySelectorAll('.star-rating label');
+  
+  stars.forEach(star => {
+      star.addEventListener('mouseover', function() {
+          // Add hover class to current and previous stars
+          let currentStar = this;
+          while(currentStar) {
+              currentStar.classList.add('hover');
+              currentStar = currentStar.previousElementSibling?.previousElementSibling;
+          }
+      });
+      
+      star.addEventListener('mouseout', function() {
+          // Remove hover class from all stars
+          document.querySelectorAll('.star-rating label').forEach(s => {
+              s.classList.remove('hover');
+          });
+      });
+  });
+  
+  // Form validation feedback
+  const form = document.getElementById('feedback-form');
+  if (form) {
+      form.addEventListener('submit', function(event) {
+          const rating = form.querySelector('input[name="rating"]:checked');
+          const message = form.querySelector('#message');
+          
+          if (!rating && form.querySelector('input[name="rating"][required]')) {
+              event.preventDefault();
+              alert('Please select a rating before submitting.');
+          }
+          
+          if (message.required && message.value.trim() === '') {
+              event.preventDefault();
+              message.classList.add('error');
+              alert('Please provide feedback before submitting.');
+          }
+      });
+  }
+});
+
+const stars = document.querySelectorAll('.star-input');
+stars.forEach(star => {
+    star.addEventListener('change', () => {
+        const ratingValue = star.value;
+        stars.forEach(s => {
+            const label = document.querySelector(`label[for="${s.id}"]`);
+            label.style.color = s.value <= ratingValue ? '#ffc107' : '#ccc'; // Change color based on selection
+        });
+    });
+});

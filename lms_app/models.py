@@ -22,6 +22,8 @@ class User(db.Model):
     
     feedbacks = db.relationship('Feedback', backref='user', lazy=True)
     active = db.Column(db.Boolean, default=True)
+    transactions = db.relationship('Transaction', back_populates='user', lazy='dynamic')
+    feedbacks = db.relationship('Feedback', back_populates='user', lazy='dynamic')
 
     def get_id(self):
         return str(self.id)
@@ -58,7 +60,7 @@ class Book(db.Model):
     isbn = db.Column(db.String(20))
 
     # 📖 Initialize Book
-    def __init__(self, title, author, genre, description, quantity=1, cover=None):
+    def __init__(self, title, author, genre, description, quantity=1, cover=None, publication_year=None, isbn=None):
         self.title = title
         self.slug = self.generate_unique_slug(title)
         self.author = author
@@ -80,7 +82,8 @@ class Book(db.Model):
 
         return slug
 
-    transactions = db.relationship('Transaction', backref='book', lazy=True)
+    transactions = db.relationship('Transaction', back_populates='book', lazy='dynamic')
+    feedbacks = db.relationship('Feedback', back_populates='book', lazy='dynamic')
 
     @property
     def availability(self):
@@ -100,11 +103,14 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
-    borrow_date = db.Column(db.DateTime, default=datetime.utcnow)
+    borrow_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     due_date = db.Column(db.DateTime, nullable=False)
     return_date = db.Column(db.DateTime)
-    status = db.Column(db.String(20), default='Borrowed')  # Borrowed/Returned/Overdue
-    fine_amount = db.Column(db.Float, default=0.0)  # 💰 Fine for overdue
+    fine_amount = db.Column(db.Float, default=0.0)
+    status = db.Column(db.String(20), default='Borrowed', nullable=False)
+
+    user = db.relationship('User', back_populates='transactions')
+    book = db.relationship('Book', back_populates='transactions')
 
 # -------------------------
 # 💬 Feedback Model
@@ -119,4 +125,5 @@ class Feedback(db.Model):
     rating = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    book = db.relationship('Book', backref='feedbacks')
+    user = db.relationship('User', back_populates='feedbacks')
+    book = db.relationship('Book', back_populates='feedbacks')

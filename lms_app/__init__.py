@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_wtf.csrf import CSRFProtect
 from config import Config
 from slugify import slugify
 from sqlalchemy import event
@@ -9,9 +10,7 @@ from sqlalchemy.engine import Engine
 from datetime import datetime, timedelta
 from markupsafe import Markup
 
-
-
-# ✅ Initialize extensions globally (no imports yet)
+csrf = CSRFProtect()
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
@@ -39,28 +38,28 @@ def time_ago(value):
         return f"{diff.days} days ago"
 
 
-def create_app(config_class):
+def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    def current_year(_):
-        return datetime.now().year
-    
-    app.jinja_env.filters['current_year'] = current_year
-    app.jinja_env.filters['slugify'] = slugify
-    app.jinja_env.filters['time_ago'] = time_ago
-
-    # ✅ Initialize extensions with app
+    csrf.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    
     login_manager.login_view = 'main.login'
+    login_manager.login_message_category = 'info'
 
-    # ⏰ Move imports INSIDE create_app (avoids circular imports)
+    app.jinja_env.filters.update({
+        'current_year': lambda _: datetime.now().year,
+        'slugify': slugify,
+        'time_ago': time_ago
+    })
+
     with app.app_context():
         from lms_app import models
         from lms_app.routes import main as main_blueprint
+        
         app.register_blueprint(main_blueprint)
-      
 
     return app

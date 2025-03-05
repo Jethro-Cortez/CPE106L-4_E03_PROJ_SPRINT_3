@@ -4,38 +4,32 @@
 {% block content %}
 <div class="container">
     <div class="user-dashboard">
-        <!-- 👋 Welcome Header -->
+
         <header class="dashboard-header">
             <h1><i class="fas fa-book-reader"></i> Welcome Back, {{ current_user.username }}</h1>
         </header>
-            
-        <section class="section-card" aria-label="User Statistics">
-            <h2><i class="fas fa-chart-bar"></i> Your Reading Stats</h2>
-            <div class="metrics-grid">
-                <div class="metric-item">
-                    <i class="fas fa-book-open fa-2x" style="color: var(--primary-color); margin-bottom: 0.5rem;"></i>
-                    <span class="metric-value">{{ total_borrowed }}</span>
-                    <h3>Books Borrowed</h3>
-                </div>
-                <div class="metric-item">
-                    <i class="fas fa-undo fa-2x" style="color: var(--primary-color); margin-bottom: 0.5rem;"></i>
-                    <span class="metric-value">{{ total_returned }}</span>
-                    <h3>Books Returned</h3>
-                </div>
-                <div class="metric-item">
-                    <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--primary-color); margin-bottom: 0.5rem;"></i>
-                    <span class="metric-value">{{ total_overdue }}</span>
-                    <h3>Overdue Books</h3>
-                </div>
+        
+        <section class="section-card">
+            <div class="card-header">
+                <h2><i class="fas fa-book-open"></i> Quick Access</h2>
+            </div>
+            <div class="quick-access-grid">
+                <a href="{{ url_for('main.search_books') }}" class="quick-action">
+                    <i class="fas fa-search fa-3x"></i>
+                    <h3>Browse All Books</h3>
+                </a>
+                <a href="{{ url_for('main.analytics_dashboard') }}" class="quick-action">
+                    <i class="fas fa-chart-line fa-3x"></i>
+                    <h3>Reading Analytics</h3>
+                </a>
             </div>
         </section>
 
-        <!-- 📚 Borrowed Books Table -->
         <section class="section-card" aria-labelledby="borrowed-books-heading">
             <h2 id="borrowed-books-heading"><i class="fas fa-book"></i> My Borrowed Books</h2>
             <div class="table-responsive">
                 <table class="table">
-                    <caption>List of borrowed books with due dates and status</caption>
+                    <caption>List of currently borrowed books with due dates and status</caption>
                     <thead>
                         <tr>
                             <th scope="col">Book</th>
@@ -69,14 +63,9 @@
                             <td>
                                 {% if transaction.status == 'Borrowed' %}
                                     <form method="POST" action="{{ url_for('main.return_book', transaction_id=transaction.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-primary">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-sm btn-primary return-button">
                                             <i class="fas fa-undo"></i> Return
-                                        </button>
-                                    </form>
-                                {% elif transaction.fine_amount > 0 %}
-                                    <form method="POST" action="{{ url_for('main.clear_fine', transaction_id=transaction.id) }}">
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-dollar-sign"></i> Clear Fine
                                         </button>
                                     </form>
                                 {% endif %}
@@ -88,7 +77,7 @@
                                 <div class="empty-state">
                                     <i class="fas fa-book fa-3x"></i>
                                     <p>You haven't borrowed any books yet.</p>
-                                    <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                                    <a href="{{ url_for('main.search_books') }}" class="btn btn-primary">
                                         <i class="fas fa-search"></i> Browse Books
                                     </a>
                                 </div>
@@ -99,13 +88,56 @@
                 </table>
             </div>
         </section>
+        
+        <section class="section-card" aria-labelledby="borrowing-history-heading">
+            <h2 id="borrowing-history-heading"><i class="fas fa-history"></i> Borrowing History</h2>
+            <div class="table-responsive">
+                <table class="table">
+                    <caption>List of previously borrowed books</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Book</th>
+                            <th scope="col">Return Date</th>
+                            <th scope="col">Fine</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for history in borrowing_history %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('main.book_details', slug=history.book.title|slugify) }}" class="book-link">
+                                    {{ history.book.title }}
+                                </a>
+                            </td>
+                            <td>{{ history.return_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                {% if history.fine_amount > 0 %}
+                                    <span class="fine-amount">${{ history.fine_amount }}</span>
+                                {% else %}
+                                    $0.00
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                <div class="empty-state">
+                                    <i class="fas fa-book fa-3x"></i>
+                                    <p>You have no borrowing history.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-        <!-- 📖 AI-Based Book Recommendations -->
         <section class="section-card" aria-labelledby="recommended-books-heading">
             <h2 id="recommended-books-heading"><i class="fas fa-lightbulb"></i> Recommended for You</h2>
             <div class="book-grid">
                 {% for book in recommended_books %}
-                <article class="book-card">
+                <article class="book-card" style="animation-delay: {{ loop.index0 * 0.1 }}s">
                     <img src="{{ url_for('static', filename='covers/' + book.cover) }}" 
                         alt="{{ book.title }} cover">
                     <h3>{{ book.title }}</h3>
@@ -122,80 +154,7 @@
                 {% endfor %}
             </div>
         </section>
-
-        <!-- 🔍 Available Books with Search -->
-        <section class="section-card" aria-labelledby="available-books-heading">
-            <div class="card-header">
-                <h2 id="available-books-heading"><i class="fas fa-search"></i> Available Books</h2>
-                <div class="search-container">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="search" class="search-input" id="book-search" placeholder="Search books..." aria-label="Search books">
-                </div>
-            </div>
-            <div class="book-grid" id="book-list">
-                {% for book in books %}
-                <article class="book-card">
-                    <img src="{{ url_for('static', filename='covers/' + book.title|slugify + '.jpg') }}"
-                         alt="Cover of {{ book.title }}">
-                    <h3>{{ book.title }}</h3>
-                    <p class="author">{{ book.author }}</p>
-                    {% if book.availability %}
-                        <a href="{{ url_for('main.borrow_book', book_id=book.id) }}" class="btn btn-primary">
-                            <i class="fas fa-book"></i> Borrow
-                        </a>
-                    {% else %}
-                        <span class="badge badge-danger">
-                            <i class="fas fa-times-circle"></i> Borrowed
-                        </span>
-                    {% endif %}
-                </article>
-                {% else %}
-                <div class="empty-state" style="grid-column: 1 / -1;">
-                    <i class="fas fa-books fa-3x"></i>
-                    <p>No books available at the moment.</p>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
     </div>
 </div>
 
-<!-- 🔍 Search Script -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('book-search');
-        const bookList = document.getElementById('book-list').children;
-
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            let hasResults = false;
-            
-            Array.from(bookList).forEach(book => {
-                const title = book.querySelector('h3').textContent.toLowerCase();
-                const author = book.querySelector('.author').textContent.toLowerCase();
-                const isMatch = title.includes(searchTerm) || author.includes(searchTerm);
-                
-                book.style.display = isMatch ? '' : 'none';
-                if (isMatch) hasResults = true;
-            });
-            
-            // Show no results message if needed
-            const noResultsEl = document.getElementById('no-results');
-            if (!hasResults && searchTerm && !noResultsEl) {
-                const noResults = document.createElement('div');
-                noResults.id = 'no-results';
-                noResults.className = 'empty-state';
-                noResults.style.gridColumn = '1 / -1';
-                noResults.innerHTML = `
-                    <i class="fas fa-search fa-3x"></i>
-                    <p>No books found matching "${searchTerm}"</p>
-                `;
-                document.getElementById('book-list').appendChild(noResults);
-            } else if ((hasResults || !searchTerm) && noResultsEl) {
-                noResultsEl.remove();
-            }
-        });
-    });
-</script>
 {% endblock %}
-

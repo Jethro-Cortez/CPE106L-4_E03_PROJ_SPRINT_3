@@ -27,6 +27,9 @@
                 <a href="{{ url_for('main.user_dashboard') }}" class="cta-btn">
                     <i class="fas fa-columns"></i> Go to Dashboard
                 </a>
+                <a href="{{ url_for('main.search_books') }}" class="cta-btn">
+                    <i class="fas fa-search"></i> Browse Books
+                </a>
             {% else %}
                 <a href="{{ url_for('main.login') }}" class="cta-btn">
                     <i class="fas fa-sign-in-alt"></i> Sign In
@@ -64,28 +67,7 @@
         </div>
     </section>
 
-    <!-- ⭐ Testimonials -->
-    <section class="testimonials">
-        <h2>What Our Readers Say</h2>
-        <div class="testimonial-cards">
-            <div class="testimonial-card">
-                <p>"BookIT made my reading journey so much smoother! The interface is intuitive and the recommendations are spot on. Highly recommend." 📖</p>
-                <span>- Alexander A.</span>
-            </div>
-            <div class="testimonial-card">
-                <p>"Love the UI and the recommendation engine is spot on! I've discovered so many great books I wouldn't have found otherwise." 🌟</p>
-                <span>- Kristoff L.</span>
-            </div>
-            <div class="testimonial-card">
-                <p>"A must-have for any book lover. The community reviews are gold and have helped me find my new favorite authors." 💬</p>
-                <span>- JE G.</span>
-            </div>
-            <div class="testimonial-card">
-                <p>"A game-changer for our library! The admin tools make managing our collection effortless. Highly recommend." 💬</p>
-                <span>- Marc D.</span>
-            </div>
-        </div>
-    </section>
+    
+
 </div>
 {% endblock %}
-
