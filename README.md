@@ -10,7 +10,7 @@ A full-stack Library Management System built with **Flask**, **SQLite**, **SQLAl
 
 ### 🏠 **Landing Page (Not Authenticated)**
 
-![Landing Page](lams_app/static/screenshots/landing_page.png)
+![Landing Page](lms_app/static/screenshots/landing_page.png)
 
 ---
 
