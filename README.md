@@ -16,53 +16,53 @@ A full-stack Library Management System built with **Flask**, **SQLite**, **SQLAl
 
 ### 🏠 **Landing Page (Authenticated)**
 
-![Landing Page](static/screenshots/landing_page(2).png)
+![Landing Page](lms_app/static/screenshots/landing_page(2).png)
 
 ---
 
 ### 🔐 **Login Page (Non-Admin)**
 
-![Login Page](static/screenshots/login_page.png)
+![Login Page](lms_app/static/screenshots/login_page.png)
 
 ---
 
 ### 📝 **User Registration (Non-Admin)**
 
-![User Registration](static/screenshots/user_registration.png)
+![User Registration](lms_app/static/screenshots/user_registration.png)
 
 ---
 
 ### 👤 **User Dashboard (Non-Admin)**
 
-![User Dashboard](static/screenshots/user_dashboard.png)
+![User Dashboard](lms_app/static/screenshots/user_dashboard.png)
 
 ---
 
 ### 👑 **Admin Registration (Admin)**
 
-![Admin Registration](static/screenshots/admin_registration.png)
+![Admin Registration](lms_app/static/screenshots/admin_registration.png)
 
 ---
 
 ### 📖 **Add New Book (Admin)**
 
-![Book Details](static/screenshots/add_new_book.png)
+![Book Details](lms_app/static/screenshots/add_new_book.png)
 
 ---
 
 ### 📊 **Admin Dashboard (Admin)**
 
-![Admin Dashboard](static/screenshots/admin_dashboard.png)
+![Admin Dashboard](lms_app/static/screenshots/admin_dashboard.png)
 
-![Admin Dashboard 2](static/screenshots/admin_dashboard(2).png)
+![Admin Dashboard 2](lms_app/static/screenshots/admin_dashboard(2).png)
 
 ---
 
 ### 🌗 **Dark Mode Toggle (Admin)**
 
-![light mode](static/screenshots/dark_mode.png) 
+![light mode](lms_app/static/screenshots/dark_mode.png) 
 
-![Dark Mode](static/screenshots/dark_mode(2).png)
+![Dark Mode](lms_app/static/screenshots/dark_mode(2).png)
 
 ---
 
